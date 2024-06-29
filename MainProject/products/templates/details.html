@@ -1,0 +1,217 @@
+{% extends '_base.html' %}
+{% load static %}
+{% load humanize %}
+{% load jformat %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'products/style.css' %}">
+{% endblock %}
+
+{% block content %}
+    {# <div class="container-fluid mb-5">#}
+    <div style="height: 100vh" class="container text-start mt-4">
+        <div class="row  d-flex align-items-start justify-content-center ">
+            <div class="col-md-5">
+                <div class="col-md-3 col-lg-3 col-12 d-flex align-items-center justify-content-center flex-column  rounded">
+                    <img src='{{ product.image.url }}' alt="" width="280rem" height="280rem" class="main m-3">
+                    <section class="">
+                        <div class=" d-flex justify-content-center gap-2 ">
+                            {% for image in product.product_images.all %}
+                                <img src="{{ image.image.url }}" width="100rem" class="border indicator">
+                            {% endfor %}
+                        </div>
+                    </section>
+                </div>
+            </div>
+            <div class="col-md-5">
+                <div>
+                    <p class="fw-bold fs-5">{{ product.name }}</p>
+                    <hr>
+                    {% if product.status == 'Color' %}
+                        <p class="fw-bold">{{ selected_var.price |intcomma }} تومان </p>
+                        {% if selected_var.discount > 1 %}
+                            <p class="fw-bold">بعد از تخفیف {{ selected_var.after_discount | intcomma }} تومان </p>
+                        {% endif %}
+                    {% else %}
+                        <p class="fw-bold">{{ product.price | intcomma }} تومان </p>
+                        {% if product.discount > 1 %}
+                            <p class="fw-bold">بعد از تخفیف {{ product.after_discount | intcomma }} تومان </p>
+                        {% endif %}
+                    {% endif %}
+                {% if product.description %}
+                    <p class="fw-bold">توضیحات محصول</p>
+                    <p>{{ product.description }}</p>
+                {% endif %}
+                    <div>
+                        <a class="text-decoration-none  mosh1" style="color: #7f2c70" href="#property">مشاهده ویژگی
+                            ها</a>
+                    </div>
+                    <div class="col d-flex align-items-center justify-content-center mt-3">
+                        {% if product.status != 'Color' %}
+                            <a href="{% url 'cart:addCart' product.id product.slug %}" type="submit"
+                               class="btn btn-light"
+                               style="background: #e0cae1;color: #7f2c70;">افزودن به سبد خرید</a>
+
+                            <a href="{% url 'products:likeProduct' product.id %}" type="submit" class="btn btn-light"
+                               style="background:#7f2c70;color:#e0cae1;">
+                                <i class="fa-regular fa-heart"></i>
+                            </a>
+                        {% else %}
+                            <a href="{% url 'cart:addVariantCart' selected_var.id %}" type="submit"
+                               class="btn btn-light"
+                               style="background: #e0cae1;color: #7f2c70;">افزودن به سبد خرید</a>
+
+                            <a href="{% url 'products:likeVarProduct' selected_var.id %}" type="submit"
+                               class="btn btn-light"
+                               style="background:#7f2c70;color:#e0cae1;">
+                                <i class="fa-regular fa-heart"></i>
+                            </a>
+                        {% endif %}
+
+                    </div>
+                </div>
+                {% if product.status != 'None' %}
+                    <div class="d-flex flex-column align-items-start mt-5">
+                        <p class="fw-bold">رنگ ها </p>
+                        <div class="d-flex">
+                            <form method="get" novalidate action="" name="">
+                                {% for v in product.variant_product.all %}
+                                    <button style="border: none;outline: none;background-color: transparent"
+                                            name="select-color" value="{{ v.id }}">
+                                        <div class="border {% if selected_var.id == v.id %} border-danger {% endif %} pt-2 mx-2"
+                                             style="">
+                                            <img width="70px" src="{{ v.image.url }}">
+                                            <p>{{ c.color.name }}</p>
+                                            <p>{{ c.color.number_color }}</p>
+                                        </div>
+                                    </button>
+                                {% endfor %}
+                            </form>
+                        </div>
+                    </div>
+                    </div>
+                {% endif %}
+        </div>
+    </div>
+    {% if product.extra_options.all %}
+        <div class="container-fluid mx-1 mt-4 " style="height: 35vh;margin-top: 15rem">
+            <div class="row d-flex align-items-top ">
+                <div class="col-3 ">
+                    <p class="fw-bold mosh">مشخصات </p>
+                </div>
+                <div class="col-8" id="property">
+                    <table class="table">
+                        {% for e in product.extra_options.all %}
+                            <tr>
+                                <th class="text-secondary" scope="col">{{ e.key }}</th>
+                                <td>{{ e.value }}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    <div class="container-fluid mx-1 mt-5">
+        <div class="row mt-5" style="height: 50vh;">
+            <div class="col-7 mt-5">
+                <p class="fw-bold mosh">امتیاز و دیدگاه کاربران</p>
+            </div>
+            <div class="row d-flex align-items-top justify-content-around">
+                <div class="col-3">
+                    <p class="small">شما هم درمورد این محصول نظر دهید</p>
+                    <button data-bs-toggle="modal" data-bs-target="#exampleModal" type="submit" class="btn text-light"
+                            style="background-color: #7f2c70">درباره ی این محصول نظر دهید
+                    </button>
+                </div>
+
+                <div class="col-8">
+                    {% if comments %}
+                        {% for comment in comments %}
+                            <div class="border p-2 rounded mt-2" style="">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <small class="fw-bold" style="font-size: 10px">{{ comment.user.full_name }}</small>
+                                    <span>{{ comment.created | jformat:'%Y/%m/%d' }}</span>
+                                </div>
+                                <p>{{ comment.body }}</p>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div>
+                            <p>نظری برای این محصول ثبت نشده، اولین نفری باشد که نظر می دهید</p>
+                        </div>
+                        </div>
+                    {% endif %}
+            </div>
+        </div>
+    </div>
+
+
+
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">دیدگاه شما در مورد محصول {{ product.name }}</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body ">
+                    <div class="row d-flex align-items-top gap-1">
+                        <div class="col-5">
+                            <p>دیدگاه خود را بنویسید</p>
+                            <form method="post" novalidate action="">
+                                {% csrf_token %}
+                                {#                {{ form.as_p }}#}
+                                <textarea class="form-control" type="text" id="body" name="body"></textarea>
+                                <button type="submit" class="btn text-light mt-3" style="background-color: #7f2c70">
+                                    ارسال دیدگاه
+                                </button>
+                            </form>
+                        </div>
+                        <div class="col-6">
+                            <p style="font-size: small">لطفا پیش از ارسال نظر، خلاصه قوانین زیر را مطالعه کنید:
+
+                                لازم است محتوای ارسالی منطبق برعرف و شئونات جامعه و با بیانی رسمی و عاری از لحن تند،
+                                تمسخرو توهین باشد.
+                                از ارسال لینک‌ سایت‌های دیگر و ارایه‌ی اطلاعات شخصی نظیر شماره تماس، ایمیل و آی‌دی
+                                شبکه‌های اجتماعی پرهیز کنید.
+                                در نظر داشته باشید هدف نهایی از ارائه‌ی نظر درباره‌ی کالا ارائه‌ی اطلاعات مشخص و مفید
+                                برای راهنمایی سایر کاربران در فرآیند انتخاب و خرید یک محصول است.
+                                تمامی نظرات پس از تایید ثبت خواهد شد، پس منتظر بمانید.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">بستن</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div style="" class="container-fluid mx-1 mt-5">
+        <div class="row">
+            <div class="col-5">
+                <p class="fw-bold mosh"> محصولات مشابه</p>
+
+            </div>
+        </div>
+        <div class="owl-carousel owl-theme ">
+            {% for same in products_same %}
+                <div class="item col-8 border py-4 px-3" style="min-height: 350px;width: 200px">
+                    <img src="{{ same.image.url }}" width="50px" height="150px">
+                    <div class="d-flex align-items-center justify-content-center flex-column">
+                        <p class="text-center">{{ same.name }}</p>
+                        <b class="">{{ same.price | intcomma }} تومان </b>
+                        <button type="submit" class="btn border mt-5">افزودن به سبد خرید</button>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    {# </div>#}
+{% endblock %}
+
+
+{% block js %}
+    <script src="{% static 'products/javaScript.js' %}"></script>
+{% endblock %}

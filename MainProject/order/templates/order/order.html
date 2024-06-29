@@ -1,0 +1,127 @@
+{% extends '_base.html' %}
+{% load humanize %}
+{% block css %}{% endblock %}
+{% block title %}{% endblock %}
+
+{% block content %}
+    <div class="container-fluid  ">
+        <div class="row border  rounded" style="width: 93rem;">
+            <div class="col-5">
+                <p class="text-dark-purple fw-bold fs-5 py-3">اطلاعات گیرنده و جزئیات سفارش</p>
+            </div>
+        </div>
+        <div style="" class="row mt-3 d-flex justify-content-between ">
+            <div class="col-9">
+                <div class="border pt-3 px-2 gap-3 rounded d-flex flex-row align-items-end justify-content-between">
+                    <div class="pt-3 px-2 gap-3 rounded d-flex flex-row align-items-center ">
+                        <div>
+                            <i class="fa-solid fa-location-dot fs-3"></i>
+                        </div>
+                        <div>
+                            <small class="text-secondary">آدرس تحویل سفارش</small>
+                            <div class="mt-3">
+                                <p class="fw-bold">{% if address_user %}{{ address_user.formatted_address }}{% else %}
+                                    {{ user_address.formatted_address }}{% endif %}</p>
+                                <p>{% if receiver %}{{ receiver.receiver_fname }} {{ receiver.receiver_lname }}{% else %}
+                                    {{ request.user.full_name }}{% endif %}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <button type="button" class="btn-pay" data-bs-toggle="modal"
+                                data-bs-target="#exampleModal">
+                            ویرایش مشخصات
+                        </button>
+                    </div>
+                </div>
+                <div class="border mt-2 pt-3 px-2 gap-3 rounded ">
+                    <p>محصولات </p>
+                    <div class="d-flex align-items-center">
+                        {% for c in cart %}
+                            <a href="{{ c.url }}" class="">
+                                <img src="{{ c.image }}" height="150px">
+                            </a>
+                        {% endfor %}
+                        {% for v in Variant %}
+
+                            <div class="d-flex align-items-center flex-column">
+                                <a href="{{ v.url }}" class="">
+                                    <img src="{{ v.image }}" height="150px">
+                                </a>
+                                <p> کد رنگ:{{ v.number_color }} </p>
+                            </div>
+
+                        {% endfor %}
+                    </div>
+                </div>
+
+            </div>
+            <div class="col-3">
+                <div class="border rounded p-3 d-flex flex-column justify-content-between gap-3" style="height: 200px">
+                    <div class="d-flex flex-column gap-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <p class="fw-bold">قیمت کالاها ({{ len_cart | add:len_variant }})</p>
+                            <p>{{ cart.get_total_price |add:variant.get_total_price | intcomma }} تومان </p>
+                        </div>
+                        {% if cart.get_total_profit > 0 or variant.get_total_profit %}
+                            <div class="d-flex align-items-center gap-3">
+                                <p class="fw-bold">سود شما از این خرید</p>
+                                <p>{{ cart.get_total_profit | add:variant.get_total_profit | intcomma }} تومان </p>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <form method="post" novalidate action="{% url 'order:SendOrder' %}">
+                        {% csrf_token %}
+                        <button  type="submit" style="text-decoration: none" href="" class="col-12 btn btn-danger">ثبت
+                            سفارش
+                        </button>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">ویرایش اطلاعات گیرنده</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="post" novalidate action="">
+                        {% csrf_token %}
+                        <div class="d-flex align-items-end  justify-content-between flex-row">
+                            <div>
+                                {% for ad in request.user.user_address.all %}
+                                  <div class="my-2">
+                                    <input {% if user_address.id == ad.id or receiver.address == ad.id %}checked{% endif %}
+                                           class="form-check-input"
+                                           type="radio" name="address" value="{{ ad.id }}">{{ ad.formatted_address }}
+                                  </div>
+                                {% endfor %}
+                            </div>
+{#                            <small class="btn-pay ">ویرایش آدرس ها</small>#}
+                        </div>
+                        <br>
+                        {{ form.as_p }}
+                        <button type="submit" class="btn btn-primary">ثبت اطلاعات</button>
+                    </form>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+
+
+
+{% block js %}
+{% endblock %}
+
+

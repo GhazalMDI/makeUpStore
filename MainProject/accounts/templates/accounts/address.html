@@ -1,0 +1,64 @@
+{% extends '_base.html' %}
+{% load static %}
+
+{% block title %}
+{% endblock %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'accounts/style.css' %}">
+
+{% endblock %}
+
+{% block content %}
+    <div class="row shadow py-4 rounded mx-4">
+    <h5 class="text-dark-purple fw-bold">آدرس خود را از روی نقشه انتخاب کنید.</h5>
+    </div>
+    <br>
+    <br>
+    <div class="border d-flex flex-column align-items-center justify-content-center rounded p-3 mx-4">
+        <div class="col-8">
+            <div id="map" class="rounded" style="height:400px;width:100%"></div>
+            <form method="get" action="" novalidate>
+                <button type="submit"
+                        class="button-edit text-light rounded px-3 py-2">تایید ادرس
+                </button>
+            </form>
+        </div>
+        <br>
+        <div class="col-8">
+            <form method="post" class="" novalidate
+                  action="{% url 'accounts:address' %}">
+                {% csrf_token %}
+                <label for="neighbourhood">محله:</label>
+                <input type="text" class="form-control" id="neighbourhood" name="neighbourhood"
+                       value="{{ neighbourhood }}"><br>
+
+                <label for="state">استان:</label>
+                <input type="text" class="form-control" id="state" name="state" value="{{ state }}"><br>
+
+                <label for="formatted_address">آدرس:</label>
+                <input type="text" id="formatted_address" name="formatted_address" class="form-control"
+                       value="{{ formatted_address }}"><br>
+
+                <label for="plaqe">پلاک:</label>
+                <input class="form-control" type="text" id="plaqe" name="plaqe"><br>
+
+                <label for="floor">طبقه:</label>
+                <input class="form-control" type="text" id="floor" name="floor"><br>
+
+                <label for="postal_code">کد پستی:</label>
+                <input class="form-control" type="text" id="postal_code" name="postal_code"><br>
+
+
+                <button type="submit" class="button-edit text-light py-2 px-3 rounded">ذخیره</button>
+            </form>
+        </div>
+
+    </div>
+
+{% endblock %}
+
+
+{% block js %}
+    <script src="{% static 'accounts/javaScripts.js' %}"></script>
+{% endblock %}

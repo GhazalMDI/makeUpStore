@@ -1,0 +1,155 @@
+{% extends '_base.html' %}
+{% load humanize %}
+{% load static %}
+
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'cart/style.css' %}">
+{% endblock %}
+
+
+
+{% block content %}
+    <main style="">
+        <div class="container">
+            <strong class="my-4">سبد خرید شما ({{ cart_len|add:len_variant }}) </strong>
+            <br>
+            {% if cart or variant %}
+                <div class="flex-md-row flex-lg-row gap-4 flex-column d-flex align-items-start justify-content-between">
+                    <div class="col-md-9 col-lg-9  col-12 border d-flex justify-content-between  rounded"
+                         style="height: 60vh;overflow-y: scroll">
+                        <div>
+                            {% for c in cart %}
+                                <div class=" mt-4 d-flex align-items-center justify-content-start">
+                                    <a href="{{ c.url }}">
+                                        <img style="width: 8rem" src="{{ c.image }}">
+                                    </a>
+                                    <div class="d-flex align-items-start flex-column">
+                                        <p class="fw-bold" style="font-size: medium">{{ c.name }}</p>
+                                        <p class="">{{ c.brand }}</p>
+                                        <p>{{ c.price |intcomma }} تومان </p>
+                                        {% if c.discount %}
+                                            <p> بعد از تخفیف {{ c.after_dis | intcomma }}  </p>
+                                        {% endif %}
+                                        <div>
+                                            <div class="d-flex align-center gap-2">
+                                                <a href="{% url 'cart:addCart' c.id c.slug %}">
+                                                    <i class="fa-solid fa-plus"></i>
+                                                </a>
+                                                <p> {{ c.quantity }}</p>
+                                                <a href="{% url 'cart:removeProduct' c.id c.slug %}">
+                                                    <i class="fa-solid fa-minus"></i>
+                                                </a>
+                                            </div>
+                                            <p>{{ c.total |intcomma }} تومان</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+
+
+
+
+                            {% for v in variant %}
+
+                                <div class=" mt-4 d-flex align-items-center justify-content-start">
+                                    <a href="{{ v.url }}">
+                                        <img style="width: 8rem" src="{{ v.image }}">
+                                    </a>
+                                    <div class="d-flex align-items-start flex-column">
+                                        <p class="fw-bold" style="font-size: medium">{{ v.name }}</p>
+                                        {#                                        <p class="">{{ v.product.brand }}</p>#}
+                                        <p>{{ v.price |intcomma }} تومان </p>
+                                        <p class="rounded-pill"
+                                           style="height: 2rem;width:2rem;background-color:#{{ v.color_code }}"></p>
+                                        {% if v.discount %}
+                                            <p> بعد از تخفیف{{ v.after_dis | intcomma }}  </p>
+                                        {% endif %}
+                                        <div>
+                                            <div class="d-flex align-center gap-2">
+                                                <a href="{% url 'cart:addVariantCart' v.id %}">
+                                                    <i class="fa-solid fa-plus"></i>
+                                                </a>
+                                                <p> {{ v.quantity }}</p>
+                                                <a href="{% url 'cart:removeVariantProduct' v.id %}">
+                                                    <i class="fa-solid fa-minus"></i>
+                                                </a>
+                                            </div>
+                                            <p>{{ v.total |intcomma }} تومان</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <div class="dropdown mt-2 mx-2 ">
+                            <button class=" dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                                    aria-expanded="false">
+                                <i class="fa-solid fa-ellipsis-vertical"></i></button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{% url 'cart:clear' %}">حذف سبد خرید</a></li>
+
+                            </ul>
+                        </div>
+                    </div>
+                    <div style="z-index: 1000"
+                         class="col-md-3 col-lg-3 col-12 flex-md-column bg-white mx-0 mt-sx-5 flex-lg-column flex-row px-2 border gap-4 rounded py-lg-5 py-md-5 py-2 d-flex align-items-center custom-fixed-bottom">
+                        {#                     class="col-md-3 col-lg-3 col-12 flex-md-column bg-white mt-sx-5 fixed-lg-bottom flex-lg-column flex-row px-2 border gap-4 rounded-lg py-lg-5 py-md-5 py-2 d-flex align-items-center ">#}
+                        <div>
+                            <div class="d-flex align-items-center gap-3">
+                                <small class="fw-bold">قیمت کالا ها ({{ cart_len|add:len_variant }})</small>
+                                <small>{{ cart.get_total_price |add:variant.get_total_price | intcomma }} تومان </small>
+                            </div>
+                            {% if cart.get_total_profit > 0 or variant.get_total_profit > 0 %}
+                                <div class="d-flex align-items-center gap-3">
+                                    <small class="fw-bold">سود شما از این خرید</small>
+                                    <small>{{ cart.get_total_profit | add:variant.get_total_profit | intcomma }}
+                                        تومان </small>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <a href="{% url 'order:Shopping' %}"
+                           style="width: 15rem;text-decoration: none;text-align: center"
+                           class="button-dark-purple">تایید و تکمیل سفارش</a>
+                    </div>
+                </div>
+                </div>
+            {% else %}
+                <div class="d-flex mt-5 flex-column align-items-center justify-content-center">
+                    {#        <i class="fa-solid fa-cart-shopping fs-2"></i>#}
+                    <h2 class="fw-bold  ">سبد خرید شما خالی است.</h2>
+                    <p class="text-secondary">برای انتخاب محصول به صفحه ی محصولات بروید.</p>
+                    <p>:)</p>
+                </div>
+                <a href=""></a>
+            {% endif %}
+
+        {% if request.user.is_authenticated %}
+            <div class="container mt-4 " style="">
+                <p class="fw-bold mosh">اخیرا بازدید شده</p>
+                <div class="owl-carousel owl-theme nonloop">
+
+                    {% for seen in seen_product %}
+                        <div class="item col-5 d-flex flex-column " style="width: 190px;min-height: 250px">
+                            <a class="d-flex justify-content-center align-items-center justify-content-center text-center flex-column" href="{{ seen.product.get_absolute_url }}">
+                                <img src="{{ seen.product.image.url }}" width="50px" height="150px">
+                                <div class="d-flex flex-column justify-content-center align-items-center">
+                                    <small>{{ seen.product.name }}</small>
+                                    <p>{{ seen.product.price | intcomma }} تومان </p>
+                                </div>
+                            </a>
+                        </div>
+
+                    {% endfor %}
+                </div>
+            </div>
+
+        {% endif %}
+    </main>
+
+
+{% endblock %}
+
+
+{% block js %}
+    <script src="{% static 'cart/javaScript.js' %}"></script>
+{% endblock %}
