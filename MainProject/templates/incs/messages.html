@@ -1,7 +1,0 @@
-{% if messages %}
-
-    {%for msg in messages %}
-        <p {% if msg.tags %}class="alert alert-{{ msg.tags }}" {% endif %}>{{ msg }}</p>
-    {% endfor %}
-
-{% endif %}
